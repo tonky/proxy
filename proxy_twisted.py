@@ -1,7 +1,7 @@
 import re
 from urlparse import urlsplit, urlunsplit
 import requests
-from twisted.internet import reactor
+from twisted.internet import reactor, ssl
 from twisted.web.resource import Resource
 from twisted.web.server import Site
 from tunneler import replace_links
@@ -79,5 +79,6 @@ class RegularView(Resource):
 
 root = Dispatch()
 factory = Site(root)
-reactor.listenTCP(8880, factory)
+reactor.listenSSL(8880, factory, ssl.DefaultOpenSSLContextFactory(
+            'example.key', 'example.pem'))
 reactor.run()
