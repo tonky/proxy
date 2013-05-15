@@ -17,8 +17,8 @@ def fix_format(content):
     # remove extraneous whitespace around "="
     trimmed = re.sub("\s*=\s*", "=", content)
 
-    # add quotes
-    return re.sub("(?P<key>action|method)=(?P<value>[a-zA-Z/]+)", '\g<key>="\g<value>"', trimmed, flags=re.I)
+    # only add quotes for the links starting with "/", breaks some js otherwise
+    return re.sub("(?P<key>action)=(?P<value>/[a-zA-Z]+)", '\g<key>="\g<value>"', trimmed, flags=re.I)
 
 def replace_links(content, client_host, target_base):
     absolute = _replace_absolute(fix_format(content), client_host, target_base)
