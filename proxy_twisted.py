@@ -1,9 +1,9 @@
 import re
 from urlparse import urlsplit, urlunsplit
 import requests
-from twisted.internet import reactor
+from twisted.internet import reactor, threads
 from twisted.web.resource import Resource
-from twisted.web.server import Site
+from twisted.web.server import Site, NOT_DONE_YET
 from tunneler import replace_links
 
 
@@ -41,15 +41,28 @@ class Tunnel(Resource):
         self.target_base = urlunsplit((p.scheme, p.netloc, '', '', ''))
 
     def render_POST(self, request):
-        return self.render_request(request, requests.post)
+        return self.async_request(request, requests.post)
 
     def render_GET(self, request):
-        return self.render_request(request, requests.get)
+        return self.async_request(request, requests.get)
 
-    def render_request(self, twisted_request, requests_method):
+    def get_url(self, requests_method, data):
         global cookies
 
-        r = requests_method(self.target, cookies=cookies, data=twisted_request.args, verify=False)
+        return requests_method(self.target, cookies=cookies, data=data, verify=False)
+
+    def async_request(self, twisted_request, requests_method):
+        def errback(err):
+            print ">>> error", err.value, err.type, err.stack, err.frames
+
+        d = threads.deferToThread(self.get_url, requests_method, twisted_request.args)
+        d.addCallback(self.render_content, twisted_request)
+        d.addErrback(errback)
+
+        return NOT_DONE_YET
+
+    def render_content(self, r, twisted_request):
+        global cookies
 
         for k,v in r.headers.items():
             if k in ['content-type', 'content-length']:
@@ -62,11 +75,13 @@ class Tunnel(Resource):
 
         # replace links only in html content
         if not re.search("(javascript|css|html)", r.headers['Content-Type']):
-            return r.content
+            twisted_request.write(r.content)
+            return twisted_request.finish()
 
         content = replace_links(r.text, self.client_host, self.target_base)
 
-        return content.encode('utf-8')
+        twisted_request.write(content.encode('utf-8'))
+        twisted_request.finish()
 
 
 class RegularView(Resource):
