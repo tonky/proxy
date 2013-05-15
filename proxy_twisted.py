@@ -61,7 +61,7 @@ class Tunnel(Resource):
             cookies = dict(r.cookies)
 
         # replace links only in html content
-        if not re.search("(css|html)", r.headers['Content-Type']):
+        if not re.search("(javascript|css|html)", r.headers['Content-Type']):
             return r.content
 
         content = replace_links(r.text, self.client_host, self.target_base)

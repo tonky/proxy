@@ -19,6 +19,7 @@ target home
 <link rel="xhr-socket" href='/_sockets' />
 background:url('/media/static/images/content-bg-middle.png?2b35c60e7ed0')
 <a href='/admin'>target admin</a>
+["/radius_cfg.asp", "RADIUS"]
 """
 
     def test_replace_links(self):
@@ -33,3 +34,4 @@ background:url('/media/static/images/content-bg-middle.png?2b35c60e7ed0')
         ok_("<SCRIPT src='http://localhost:8000/tunnel/http://localhost:9000/acd_common.js' language=\"JavaScript\"" in new_body)
         ok_('<FORM NAME="accedian_login" ACTION="http://localhost:8000/tunnel/http://localhost:9000/login" METHOD="POST">' in new_body)
         ok_("background:url('http://localhost:8000/tunnel/http://localhost:9000/media/static/images/content-bg-middle.png?2b35c60e7ed0')" in new_body)
+        ok_('["http://localhost:8000/tunnel/http://localhost:9000/radius_cfg.asp", "RADIUS"]' in new_body)
