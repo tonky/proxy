@@ -1,3 +1,5 @@
 django
 requests
 twisted
+nose
+pyopenssl

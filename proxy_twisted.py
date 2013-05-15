@@ -1,7 +1,7 @@
 import re
 from urlparse import urlsplit, urlunsplit
 import requests
-from twisted.internet import reactor, ssl
+from twisted.internet import reactor
 from twisted.web.resource import Resource
 from twisted.web.server import Site
 from tunneler import replace_links
@@ -49,10 +49,10 @@ class Tunnel(Resource):
     def render_request(self, twisted_request, requests_method):
         global cookies
 
-        r = requests_method(self.target, cookies=cookies, data=twisted_request.args)
+        r = requests_method(self.target, cookies=cookies, data=twisted_request.args, verify=False)
 
         for k,v in r.headers.items():
-            if k in ['Content-Type', 'Content-Length']:
+            if k in ['content-type', 'content-length']:
                 twisted_request.setHeader(k, v)
 
         # make sure to store cookies if we get them, to reuse when actually returning
@@ -61,7 +61,7 @@ class Tunnel(Resource):
             cookies = dict(r.cookies)
 
         # replace links only in html content
-        if not re.search("html", r.headers['Content-Type']):
+        if not re.search("(css|html)", r.headers['Content-Type']):
             return r.content
 
         content = replace_links(r.text, self.client_host, self.target_base)
@@ -79,6 +79,5 @@ class RegularView(Resource):
 
 root = Dispatch()
 factory = Site(root)
-reactor.listenSSL(8880, factory, ssl.DefaultOpenSSLContextFactory(
-            'example.key', 'example.pem'))
+reactor.listenTCP(8880, factory)
 reactor.run()

@@ -14,7 +14,10 @@ target home
 </form>
 <a href='http://localhost:9000/links'>target absolute links</a>
 <img class="graph-loading dots" src="/images/spinners/octocat-spinner-128.gif" width="64">
+<SCRIPT src = '/acd_common.js' language="JavaScript" type="text/javascript"> </SCRIPT>
+<FORM NAME="accedian_login" ACTION=/login METHOD=POST>
 <link rel="xhr-socket" href='/_sockets' />
+background:url('/media/static/images/content-bg-middle.png?2b35c60e7ed0')
 <a href='/admin'>target admin</a>
 """
 
@@ -27,3 +30,6 @@ target home
         ok_("action='http://localhost:8000/tunnel/http://localhost:9000/admin/' method='post'" in new_body)
         ok_('src="http://localhost:8000/tunnel/http://localhost:9000/images/spinners/octocat-spinner-128.gif"' in new_body)
         ok_("href='http://localhost:8000/tunnel/http://localhost:9000/_sockets'" in new_body)
+        ok_("<SCRIPT src='http://localhost:8000/tunnel/http://localhost:9000/acd_common.js' language=\"JavaScript\"" in new_body)
+        ok_('<FORM NAME="accedian_login" ACTION="http://localhost:8000/tunnel/http://localhost:9000/login" METHOD="POST">' in new_body)
+        ok_("background:url('http://localhost:8000/tunnel/http://localhost:9000/media/static/images/content-bg-middle.png?2b35c60e7ed0')" in new_body)
