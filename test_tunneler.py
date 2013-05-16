@@ -20,6 +20,7 @@ document.writeln("<FORM action=goform/g8032_clear?idx=")
 <link rel="xhr-socket" href='/_sockets' />
 background:url('/media/static/images/content-bg-middle.png?2b35c60e7ed0')
 <a href='/admin'>target admin</a>
+<link href="default.css">
 ["/radius_cfg.asp", "RADIUS"]
 """
 
@@ -37,3 +38,4 @@ background:url('/media/static/images/content-bg-middle.png?2b35c60e7ed0')
         ok_('<FORM action=goform/g8032_clear?idx=' in new_body)
         ok_("background:url('http://localhost:8000/tunnel/http://localhost:9000/media/static/images/content-bg-middle.png?2b35c60e7ed0')" in new_body)
         ok_('["http://localhost:8000/tunnel/http://localhost:9000/radius_cfg.asp", "RADIUS"]' in new_body)
+        ok_('"http://localhost:8000/tunnel/http://localhost:9000/default.css"' in new_body)
