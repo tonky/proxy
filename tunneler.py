@@ -7,7 +7,10 @@ import re
 # replace relative links in js and css as well
 def _replace_relative(content, client_host, target_base):
     tunneled = "\g<1>\g<2>%s/%s/\g<3>\g<4>" % (client_host, target_base)
-    return re.sub("(url\(|\[|data-source=|data-url=|src=|action=|href=)('|\")(\S*)('|\")", tunneled, content, flags=re.I)
+    return re.sub("(url\(|data-source=|data-url=|src=|action=|href=)('|\")(\S*)('|\")", tunneled, content, flags=re.I)
+
+def replace_js(content, client_host, target_base):
+    return re.sub("\[('|\")(\S*.asp)('|\")", "[\g<1>%s/%s/\g<2>\g<3>" % (client_host, target_base), content, flags=re.I)
 
 # absolute links are easier, as we can just add a tunnel url in front of absolute remote one
 def _replace_absolute(content, client_host, target_base):
@@ -23,6 +26,7 @@ def fix_format(content):
 def replace_links(content, client_host, target_base):
     # remove any absolute links, then treat them all as relative
     relative = re.sub(target_base, '', content)
-    fixed =  _replace_relative(fix_format(relative), client_host, target_base)
+    fixed = _replace_relative(fix_format(relative), client_host, target_base)
+    js_fixed = replace_js(fixed, client_host, target_base)
     # fix resulting double slash at the end of target_base
-    return re.sub(target_base+"//", target_base+"/", fixed)
+    return re.sub(target_base+"//", target_base+"/", js_fixed)
