@@ -23,6 +23,8 @@ background:url('/media/static/images/content-bg-middle.png?2b35c60e7ed0')
 <link href="default.css">
 ["/radius_cfg.asp", "RADIUS"]
 indexOf("["+menu_id+"]")==-1
+<img alt="Communicate" src="https://a248.e.akamai.net/assets.github.com/images/modules/home/communicate.png?1360648847" />
+
 """
 
     def test_replace_links(self):
@@ -41,3 +43,4 @@ indexOf("["+menu_id+"]")==-1
         ok_('["http://localhost:8000/tunnel/http://localhost:9000/radius_cfg.asp", "RADIUS"]' in new_body)
         ok_('indexOf("["+menu_id+"]")==-1' in new_body)
         ok_('"http://localhost:8000/tunnel/http://localhost:9000/default.css"' in new_body)
+        ok_('src="https://a248.e' in new_body)

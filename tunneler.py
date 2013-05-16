@@ -6,8 +6,17 @@ import re
 # i.e. '(stuff)="/<link>"' to '(stuff)="<client_tunnel_url>/link"'
 # replace relative links in js and css as well
 def _replace_relative(content, client_host, target_base):
-    tunneled = "\g<1>\g<2>%s/%s/\g<3>\g<4>" % (client_host, target_base)
-    return re.sub("(url\(|data-source=|data-url=|src=|action=|href=)('|\")(\S*)('|\")", tunneled, content, flags=re.I)
+    def url_repl(match):
+        key = match.group(1)
+        separator = match.group(2)
+        link = match.group(3)
+
+        if 'http' in link:
+            return match.group(0)
+
+        return "%s%s%s/%s/%s%s" % (key, separator, client_host, target_base, link, separator)
+
+    return re.sub("(url\(|data-source=|data-url=|src=|action=|href=)('|\")(\S*)('|\")", url_repl, content, flags=re.I)
 
 def replace_js(content, client_host, target_base):
     return re.sub("\[('|\")(\S*.asp)('|\")", "[\g<1>%s/%s/\g<2>\g<3>" % (client_host, target_base), content, flags=re.I)
