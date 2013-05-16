@@ -74,13 +74,14 @@ class Tunnel(Resource):
             cookies = dict(r.cookies)
 
         # replace links only in html content
-        if not re.search("(javascript|css|html)", r.headers['Content-Type']):
+        if not 'cache' in not re.search("(javascript|css|html)", r.headers['Content-Type']):
             twisted_request.write(r.content)
             return twisted_request.finish()
 
-        content = replace_links(r.text, self.client_host, self.target_base)
+        content = replace_links(r.text, self.client_host, self.target_base).encode('utf-8')
+        twisted_request.setHeader('content-length', len(content))
 
-        twisted_request.write(content.encode('utf-8'))
+        twisted_request.write(content)
         twisted_request.finish()
 
 
