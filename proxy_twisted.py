@@ -49,11 +49,16 @@ class Tunnel(Resource):
     def get_url(self, requests_method, data):
         global cookies
 
-        return requests_method(self.target, cookies=cookies, data=data, verify=False)
+        result = requests_method(self.target, cookies=cookies, data=data, verify=False)
+
+        return result
 
     def async_request(self, twisted_request, requests_method):
         def errback(err):
             print ">>> error", err.value, err.type, err.stack, err.frames
+
+        # content = self.get_url(requests_method, twisted_request.args)
+        # return self.render_content(content, twisted_request)
 
         d = threads.deferToThread(self.get_url, requests_method, twisted_request.args)
         d.addCallback(self.render_content, twisted_request)
@@ -74,9 +79,12 @@ class Tunnel(Resource):
             cookies = dict(r.cookies)
 
         # replace links only in html content
-        if not 'cache' in not re.search("(javascript|css|html)", r.headers['Content-Type']):
+        if 'cache.html' in self.target or not re.search("(javascript|css|html)", r.headers['Content-Type']):
             twisted_request.write(r.content)
             return twisted_request.finish()
+
+        content = replace_links(r.text, self.client_host, self.target_base).encode('utf-8')
+        twisted_request.setHeader('content-length', len(content))
 
         content = replace_links(r.text, self.client_host, self.target_base).encode('utf-8')
         twisted_request.setHeader('content-length', len(content))
