@@ -36,9 +36,11 @@ class Tunnel(Resource):
         self.target = target
         self.client_host = client_host
 
-        p = urlsplit(target)
+    @property
+    def target_base(self):
+        p = urlsplit(self.target)
 
-        self.target_base = urlunsplit((p.scheme, p.netloc, '', '', ''))
+        return urlunsplit((p.scheme, p.netloc, '', '', ''))
 
     def render_POST(self, request):
         return self.async_request(request, requests.post)
@@ -49,7 +51,7 @@ class Tunnel(Resource):
     def get_url(self, requests_method, data):
         global cookies
 
-        return requests_method(self.target, cookies=cookies, data=data, verify=False)
+        return requests_method(self.target, cookies=cookies, data=data, verify=False, allow_redirects=True)
 
     def async_request(self, twisted_request, requests_method):
         def errback(err):
@@ -63,6 +65,10 @@ class Tunnel(Resource):
 
     def render_content(self, r, twisted_request):
         global cookies
+
+        # this will provide correct target_base for links replacement if there were 
+        # any redirects
+        self.target = r.url
 
         for k,v in r.headers.items():
             if k in ['content-type', 'content-length']:
@@ -96,5 +102,6 @@ class RegularView(Resource):
 
 root = Dispatch()
 factory = Site(root)
+print ">>> running on 127.0.0.1:8880"
 reactor.listenTCP(8880, factory)
 reactor.run()
